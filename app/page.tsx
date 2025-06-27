@@ -7,6 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "next/image"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Plus, Upload, Eye, EyeOff } from "lucide-react"
 
 
 // Mock data for announcements
@@ -70,6 +75,17 @@ export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState(initialAnnouncements)
   const [selectedEmployees, setSelectedEmployees] = useState({})
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [newAnnouncement, setNewAnnouncement] = useState({
+    title: "",
+    text: "",
+    image: null,
+  })
+  const [imagePreview, setImagePreview] = useState(null)
+  const [isCreating, setIsCreating] = useState(false)
 
   // Separate current and previous announcements
   const currentAnnouncements = announcements.filter((ann) => ann.acknowledgedEmployees < ann.totalEmployees)
@@ -106,6 +122,71 @@ export default function AnnouncementsPage() {
 
   const prevSlide = () => {
     setCurrentCarouselIndex((prev) => (prev === 0 ? previousAnnouncements.length - 1 : prev - 1))
+  }
+
+   const handlePasswordSubmit = (e) => {
+    e.preventDefault()
+    // Simple password check - in production, use proper authentication
+    if (password === "admin123") {
+      setIsAuthenticated(true)
+      setPassword("")
+    } else {
+      alert("Incorrect password")
+    }
+  }
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setNewAnnouncement((prev) => ({ ...prev, image: file }))
+
+      // Create preview URL
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImagePreview(e.target.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleCreateAnnouncement = async (e) => {
+    e.preventDefault()
+    if (!newAnnouncement.text.trim()) {
+      alert("Please enter announcement text")
+      return
+    }
+
+    setIsCreating(true)
+
+    // Simulate API call delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    const announcement = {
+      id: Date.now(),
+      title: newAnnouncement.title || "New Announcement",
+      text: newAnnouncement.text,
+      image: imagePreview, // In production, upload to server and get URL
+      totalEmployees: 8,
+      acknowledgedEmployees: 0,
+      acknowledgedBy: [],
+    }
+
+    setAnnouncements((prev) => [announcement, ...prev])
+
+    // Reset form
+    setNewAnnouncement({ title: "", text: "", image: null })
+    setImagePreview(null)
+    setIsCreating(false)
+    setIsModalOpen(false)
+    setIsAuthenticated(false)
+  }
+
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+    setIsAuthenticated(false)
+    setPassword("")
+    setNewAnnouncement({ title: "", text: "", image: null })
+    setImagePreview(null)
   }
 
   const AnnouncementCard = ({ announcement, isPrevious = false }) => {
@@ -213,13 +294,147 @@ export default function AnnouncementsPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Page Title */}
-        <h1 className='text-7xl text-center font-bold mb-8 text-black '>Announcements</h1>
+        <h1 className='text-7xl text-center font-bold mb-16 text-black '>Announcements</h1>
 
         {/* Current Announcements */}
         <div className="space-y-8 mb-12">
           {currentAnnouncements.map((announcement) => (
             <AnnouncementCard key={announcement.id} announcement={announcement} />
           ))}
+        </div>
+
+           {/* Create Announcement Button */}
+        <div className="flex justify-center mb-16">
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-medium flex items-center gap-2 text-lg">
+                <Plus className="h-6 w-6" />
+                Create Announcement
+              </Button>
+            </DialogTrigger>
+
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Create New Announcement</DialogTitle>
+              </DialogHeader>
+
+              {!isAuthenticated ? (
+                // Password Protection Screen
+                <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="password">Enter Admin Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter password"
+                        className="pr-10"
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Hint: admin123</p>
+                  </div>
+                  <Button type="submit" className="w-full">
+                    Authenticate
+                  </Button>
+                </form>
+              ) : (
+                // Announcement Creation Form
+                <form onSubmit={handleCreateAnnouncement} className="space-y-4">
+                  <div>
+                    <Label htmlFor="title">Title (Optional)</Label>
+                    <Input
+                      id="title"
+                      value={newAnnouncement.title}
+                      onChange={(e) => setNewAnnouncement((prev) => ({ ...prev, title: e.target.value }))}
+                      placeholder="Enter announcement title"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="text">Announcement Text</Label>
+                    <Textarea
+                      id="text"
+                      value={newAnnouncement.text}
+                      onChange={(e) => setNewAnnouncement((prev) => ({ ...prev, text: e.target.value }))}
+                      placeholder="Enter your announcement message"
+                      rows={4}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="image">Image (Optional)</Label>
+                    <div className="mt-2">
+                      <div className="flex items-center justify-center w-full">
+                        <label
+                          htmlFor="image"
+                          className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                        >
+                          {imagePreview ? (
+                            <img
+                              src={imagePreview || "/placeholder.svg"}
+                              alt="Preview"
+                              className="h-full w-full object-cover rounded-lg"
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              <Upload className="w-8 h-8 mb-4 text-gray-500" />
+                              <p className="mb-2 text-sm text-gray-500">
+                                <span className="font-semibold">Click to upload</span> or drag and drop
+                              </p>
+                              <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                            </div>
+                          )}
+                          <input
+                            id="image"
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                          />
+                        </label>
+                      </div>
+                      {imagePreview && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() => {
+                            setImagePreview(null)
+                            setNewAnnouncement((prev) => ({ ...prev, image: null }))
+                          }}
+                        >
+                          Remove Image
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-4">
+                    <Button type="button" variant="outline" onClick={handleModalClose} className="flex-1">
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isCreating} className="flex-1">
+                      {isCreating ? "Creating..." : "Create Announcement"}
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Previous Announcements Section */}
