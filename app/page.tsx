@@ -293,7 +293,7 @@ export default function AnnouncementsPage() {
   }
 
   return (
-    <div className="min-h-screen py-14 bg-cover position-fixed bg-[url('../public/images/black-bg.jpg')]">
+    <div className="min-h-screen py-14 bg-cover position-fixed bg-[url('../public/images/black-abstract-bg.jpeg')]">
       
       <div className="container mx-auto z-0 px-2 max-w-4xl">
         {/* Page Title */}
