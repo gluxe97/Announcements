@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Plus, Upload, Eye, EyeOff } from "lucide-react"
+import backgroundimg from '../public/images/Announcement-bg.jpeg'
+
 
 
 // Mock data for announcements
@@ -203,13 +205,13 @@ export default function AnnouncementsPage() {
 
     return (
       <Card className={cardClasses}>
-        <CardContent className="p-8">
+        <CardContent className="p-4">
           {/* Progress bar - only show for current announcements */}
           {!isPrevious && (
-            <div className="mb-6">
-              <Progress value={progressPercentage} className="h-2" />
-              <p className="text-sm text-gray-600 mt-2 text-center">
-                {announcement.acknowledgedEmployees} of {announcement.totalEmployees} employees have acknowledged
+            <div className="mb-10">
+              <Progress value={progressPercentage} className="h-1" />
+              <p className="text-xs text-gray-600 mt-2 text-center">
+                {announcement.acknowledgedEmployees} of {announcement.totalEmployees}
               </p>
             </div>
           )}
@@ -238,7 +240,7 @@ export default function AnnouncementsPage() {
           {/* Bottom section - only show for current announcements */}
           {!isPrevious && (
             <>
-              <div className="flex items-center gap-4 bg-black rounded-full p-2">
+              <div className="flex items-center gap-4 bg-orange-400 rounded-full p-2">
                 {/* Employee selector */}
                 <div className="flex-1">
                   <Select
@@ -246,7 +248,7 @@ export default function AnnouncementsPage() {
                     onValueChange={(value) => handleEmployeeSelect(announcement.id, value)}
                     disabled={hasEmployeeAcknowledged}
                   >
-                    <SelectTrigger className="bg-white border-0 rounded-full text-lg font-medium h-12">
+                    <SelectTrigger className="bg-white border-0 px-10 rounded-full text-sm font-small h-12">
                       <SelectValue placeholder="Name/username" />
                     </SelectTrigger>
                     <SelectContent>
@@ -265,7 +267,7 @@ export default function AnnouncementsPage() {
                 <Button
                   onClick={() => handleAcknowledge(announcement.id)}
                   disabled={!selectedEmployee || hasEmployeeAcknowledged}
-                  className="bg-gray-300 hover:bg-gray-200 text-black rounded-full px-8 h-12 text-lg font-medium border-0"
+                  className="bg-white hover:bg-orange-200 text-black rounded-full px-12 h-10 text-sm font-small border-0"
                 >
                   {hasEmployeeAcknowledged ? "Acknowledged" : "Acknowledge"}
                 </Button>
@@ -291,13 +293,14 @@ export default function AnnouncementsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
+    <div className="min-h-screen py-14 bg-cover position-fixed bg-[url('../public/images/black-bg.jpg')]">
+      
+      <div className="container mx-auto z-0 px-2 max-w-4xl">
         {/* Page Title */}
-        <h1 className='text-7xl text-center font-bold mb-16 text-black '>Announcements</h1>
+        <h1 className='text-6xl text-center font-bold mb-30 text-white '>Announcements</h1>
 
         {/* Current Announcements */}
-        <div className="space-y-8 mb-12">
+        <div className="space-y-8 m-4 mb-12">
           {currentAnnouncements.map((announcement) => (
             <AnnouncementCard key={announcement.id} announcement={announcement} />
           ))}
@@ -313,7 +316,7 @@ export default function AnnouncementsPage() {
               </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md justify-center">
               <DialogHeader>
                 <DialogTitle>Create New Announcement</DialogTitle>
               </DialogHeader>
@@ -321,16 +324,16 @@ export default function AnnouncementsPage() {
               {!isAuthenticated ? (
                 // Password Protection Screen
                 <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="password">Enter Admin Password</Label>
-                    <div className="relative">
+                  <div className="mt-8">
+                    
+                    <div className="relative mt-2">
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter password"
-                        className="pr-10"
+                        className="pr-10 mt-2"
                         required
                       />
                       <Button
@@ -343,9 +346,9 @@ export default function AnnouncementsPage() {
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Hint: admin123</p>
+                  
                   </div>
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full mt-12">
                     Authenticate
                   </Button>
                 </form>
@@ -439,12 +442,12 @@ export default function AnnouncementsPage() {
 
         {/* Previous Announcements Section */}
         {previousAnnouncements.length > 0 && (
-          <div className="mt-16">
-            <h2 className="text-4xl font-bold text-center mb-8 text-gray-700">Previous Announcements</h2>
+          <div className="mt-16 m-4">
+            <h2 className="text-4xl font-bold text-center mb-8 text-white">Previous Announcements</h2>
 
             <div className="relative">
               {/* Carousel Container */}
-              <div className="overflow-hidden rounded-3xl">
+              <div className="overflow-hidden m-6 rounded-3xl">
                 <div
                   className="flex transition-transform duration-300 ease-in-out"
                   style={{ transform: `translateX(-${currentCarouselIndex * 100}%)` }}
@@ -462,15 +465,15 @@ export default function AnnouncementsPage() {
                 <>
                   <Button
                     onClick={prevSlide}
-                    className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-white hover:bg-gray-100 text-gray-800 rounded-full p-2 shadow-lg"
+                    className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-white hover:bg-blue-400 text-black p-2 rounded-full shadow-lg"
                     size="icon"
                   >
-                    <ChevronLeft className="h-6 w-6" />
+                    <ChevronLeft className="h-6 w-6 " />
                   </Button>
 
                   <Button
                     onClick={nextSlide}
-                    className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 bg-white hover:bg-gray-100 text-gray-800 rounded-full p-2 shadow-lg"
+                    className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 bg-white hover:bg-blue-400 text-black rounded-full p-2 shadow-lg"
                     size="icon"
                   >
                     <ChevronRight className="h-6 w-6" />
@@ -485,7 +488,7 @@ export default function AnnouncementsPage() {
                     <button
                       key={index}
                       onClick={() => setCurrentCarouselIndex(index)}
-                      className={`w-3 h-3 rounded-full transition-colors ${
+                      className={`w-2 h-3  transition-colors ${
                         index === currentCarouselIndex ? "bg-blue-500" : "bg-gray-300"
                       }`}
                     />
